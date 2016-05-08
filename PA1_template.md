@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Introduction
@@ -30,7 +25,8 @@ This shows the code that is needed to
 2. Process/transform the data (if necessary) into a format suitable for your analysis
 
 The working directory must be set to the location where the rmd-File is. 
-```{r}
+
+```r
 # Read data from file
 act <- read.csv(unz("activity.zip", "activity.csv"), header = TRUE, sep = ",")
 # Convert date format
@@ -44,14 +40,31 @@ The missing values in the dataset can be ignored. The following code shows
 1. How to Make a histogram of the total number of steps taken each day
 2. How the **mean** and **median** of the total number of steps taken per day are calculated and reported 
 
-```{r}
+
+```r
 # Apply the sum() function to the days 
 num_steps <- tapply(act$steps, act$date, sum, na.rm = T) 
 # Plot a histogram
 hist(num_steps, xlab = "Steps", main = "Total Steps per Day", breaks = 10)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+```r
 # Apply the mean() function and the median() function to the total number of steps calculate above
 mean(num_steps)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 median(num_steps)
+```
+
+```
+## [1] 10395
 ```
   
 
@@ -60,18 +73,26 @@ This section shows
 
 1. How to make a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r}
+
+```r
 # Apply the mean() function to daily intervals 
 int_steps <- aggregate(act$steps, by = list(act$interval), FUN = mean, na.rm = T) 
 # Plot the time series
 plot(x = int_steps[,1], y = int_steps[,2], type = "l", xlab = "Daily Intervals", ylab = "Mean of Steps", main = "Daily Activity Pattern")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps
 
-```{r}
+
+```r
 # Use the max() function to evaluate the interval with the maximum number of steps 
 int_steps[which.max(int_steps[,2]),1]
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
@@ -80,13 +101,15 @@ Therefor the following is done:
 
 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with `NA`s)
 
-```{r}
+
+```r
 NAs <- sum(apply(is.na(act), 1, any))
 ```
 
 2. Devise a strategy for filling in all of the missing values in the dataset. 
 
-```{r}
+
+```r
 # Create a function  to replace  missing values with the mean value of its 5-minute interval
 NA.replace <- function(steps, interval) {
     value <- NA
@@ -100,23 +123,41 @@ NA.replace <- function(steps, interval) {
 
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r}
+
+```r
 act_new <- act
 act_new$steps <- mapply(NA.replace, act_new$steps, act_new$interval)
 NAs_now <- sum(apply(is.na(act_new), 1, any))
 ```
-The total number of missing values in the data is now `r NAs_now`.  
+The total number of missing values in the data is now 0.  
 
 4. Make a histogram of the total number of steps taken each day and Calculate and report the **mean** and **median** total number of steps taken per day.
 
-```{r}
+
+```r
 # Apply the sum() function to the days 
 num_steps_new <- tapply(act_new$steps, act_new$date, sum) 
 # Plot a histogram
 hist(num_steps_new, xlab = "Steps", main = "Total Steps per Day", breaks = 10)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+
+```r
 # Apply the mean() function and the median() function to the total number of steps calculate above
 mean(num_steps_new)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(num_steps_new)
+```
+
+```
+## [1] 10766.19
 ```
 The new mean of total number steps per day and the new median of total number steps per day is slightly higer than the original mean and median of the first part of the assignment.
 
@@ -126,7 +167,8 @@ In this section the following data manipulation is executed:
 
 1. Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r}
+
+```r
 # Create a function to decide if a given date is a weekday or weekend
 weekday.weekend <- function(date) {
     value <- NA
@@ -139,18 +181,22 @@ weekday.weekend <- function(date) {
 ```
 
 Use of this function to create a new factor variable in the new dataset.
-```{r}
+
+```r
 act_new$day <- mapply(weekday.weekend, act_new$date)
 ```
 
 1. Make a panel plot containing a time series plot (i.e. `type = "l"`) of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
 
-```{r}
+
+```r
 # Apply the mean() function to daily intervals
 int_steps <- aggregate(act_new$steps, by = list(act_new$interval, act_new$day), FUN = mean)
 # Plot the time series panels
 library(lattice)
 xyplot(x ~ Group.1 | Group.2, data = int_steps, type = "l", layout = c(1, 2), xlab = "Interval", ylab = "Number of Steps")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
 
 
